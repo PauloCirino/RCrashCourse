@@ -1,0 +1,70 @@
+---
+title: "Tidy Data Work Flow"
+author: "Paulo Cirino Ribeiro Neto"
+date: "27/04/2017"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, fig.width = 10)
+```
+
+## Pacotes
+Iniciamos com o Carregamento dos pacotes que serão utilizados.
+
+```{r, warning = FALSE, message = FALSE}
+require('readr')
+require('dplyr')
+require('tidyr')
+require('ggplot2')
+require('plotly')
+require('xtable')
+require('DT')
+``` 
+A Função dos pacotes carregados é como segue:
+- **readr** : Leitura de Dados
+- **dplyr** : Manipulação e Transformação de Dados
+- **tidyr** : Formatação de Tabelas
+- **ggplot2** : Gráficos Estáticos
+- **plotly** : Gráficos Dinâmicos
+- **xtable** : Tabelas Estáticas no formato _Latex_
+- **DT** : Tabelas Dinâmicas
+
+## Dados
+O primeiro passo em qualquer análise de dados, é sempre a leitura de dados seguida de estatísticas descritívas básicas:
+```{r, message = FALSE, warning = FALSE}
+MovieData <- readr::read_csv(file = './Data/movie_metadata.csv')
+```
+
+```{r, message = FALSE, warning = FALSE}
+MovieData %>% 
+    summary() %>%
+    data.frame() %>%
+    DT::datatable()
+```
+
+```{r, message = FALSE, warning = FALSE}
+MovieData %>% 
+    summary() %>%
+    data.frame() %>%
+    dplyr::select(-Var1) %>%
+    tidyr::separate(col = Freq, into = c("rowName", "Val"), sep = ':') %>%
+    dplyr::filter(!is.na(rowName)) %>%
+    tidyr::spread(key = rowName, value = Val) %>%
+    DT::datatable()
+```
+
+```{r, message = TRUE, warning = TRUE}
+movieDataTable <- MovieData %>% 
+                    summary() %>%
+                    data.frame() %>%
+                    dplyr::select(-Var1) %>%
+                    tidyr::separate(col = Freq, into = c("rowName", "Val"), sep = ':') %>%
+                    dplyr::filter(!is.na(rowName)) %>%
+                    tidyr::spread(key = rowName, value = Val)
+try (expr ={ 
+        movieDataTable %>%
+            dplyr::filter(Class == 'character')
+            }
+     )
+```
